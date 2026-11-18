@@ -9,7 +9,17 @@ find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
 add_executable(kaji
-    src/main.cc
+    src/main.cpp
+    src/application.cpp
+    src/shader.cpp
+)
+
+target_include_directories(kaji PRIVATE
+    "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_compile_definitions(kaji PRIVATE
+    KAJI_SHADER_DIR="${PROJECT_SOURCE_DIR}/shaders"
 )
 
 target_compile_features(kaji PRIVATE cxx_std_23)
