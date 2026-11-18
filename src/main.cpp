@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <string>
 
 int main() {
@@ -28,8 +29,15 @@ int main() {
              0.25f, 0.5f, 0.0f
         };
 
+        std::vector<float> triangle_three = {
+            0.5f, -0.5f, 0.0f,
+            1.0f, -0.5f, 0.0f,
+            0.75f, 0.5f, 0.0f
+        };
+
         app.add_render_item(shader, std::make_unique<kaji::Mesh>(triangle_one));
         app.add_render_item(shader, std::make_unique<kaji::Mesh>(triangle_two));
+        app.add_render_item(shader, std::make_unique<kaji::Mesh>(triangle_three));
 
         app.run();
         return EXIT_SUCCESS;
