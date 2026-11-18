@@ -9,8 +9,9 @@ find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
 add_executable(kaji
-    src/main.cpp
     src/application.cpp
+    src/main.cpp
+    src/mesh.cpp
     src/shader.cpp
 )
 
