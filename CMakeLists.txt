@@ -11,7 +11,7 @@ find_package(glfw3 CONFIG REQUIRED)
 add_executable(kaji
     src/application.cpp
     src/main.cpp
-    src/mesh.cpp
+    src/gfx/mesh.cpp
     src/gfx/shader.cpp
 )
 
