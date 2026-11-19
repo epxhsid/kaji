@@ -82,7 +82,7 @@ void Mesh::update_orphan(std::span<const float> vertices) {
     vertex_count_ = static_cast<GLsizei>(vertices.size() / 3);
 }
 
-void Mesh::update_mapped(std::span<const float> vertices, bool orphan_whole_buffer) {
+void Mesh::update_mapped(std::span<const float> vertices) {
     const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
 
     if (byte_size > capacity_bytes_) {
@@ -95,12 +95,7 @@ void Mesh::update_mapped(std::span<const float> vertices, bool orphan_whole_buff
         return;
     }
 
-    GLbitfield access = GL_MAP_WRITE_BIT;
-    if (orphan_whole_buffer) {
-        access |= GL_MAP_INVALIDATE_BUFFER_BIT;
-    } else {
-        access |= GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
-    }
+    const GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     void* ptr = glMapBufferRange(GL_ARRAY_BUFFER, 0, byte_size, access);
