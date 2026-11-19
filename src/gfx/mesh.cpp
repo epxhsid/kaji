@@ -22,6 +22,11 @@ Mesh::Mesh(std::span<const float> vertices, BufferUsage usage) {
     gl_usage_ = to_gl_usage(usage);
     const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
     init_buffers(byte_size, vertices.data(), gl_usage_);
+
+    if (vertices.size() % 3 != 0) {
+        throw std::invalid_argument("vertex float count must be a multiple of 3");
+    }
+
     vertex_count_ = static_cast<GLsizei>(vertices.size() / 3);
 }
 
@@ -68,14 +73,20 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 
 void Mesh::update_orphan(std::span<const float> vertices) {
     const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
+    const GLsizeiptr alloc_size = (byte_size > capacity_bytes_) ? byte_size : capacity_bytes_;
 
-    // resizes if needed
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-    glBufferData(GL_ARRAY_BUFFER, byte_size, nullptr, gl_usage_);
-    capacity_bytes_ = byte_size;
+    if (alloc_size > 0) {
+        glBufferData(GL_ARRAY_BUFFER, alloc_size, nullptr, gl_usage_);
+        capacity_bytes_ = alloc_size;
+    }
 
     if (byte_size > 0 && vertices.data() != nullptr) {
         glBufferSubData(GL_ARRAY_BUFFER, 0, byte_size, vertices.data());
+    }
+
+    if (vertices.size() % 3 != 0) {
+        throw std::invalid_argument("vertex float count must be a multiple of 3");
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -109,6 +120,10 @@ void Mesh::update_mapped(std::span<const float> vertices) {
     if (glUnmapBuffer(GL_ARRAY_BUFFER) == GL_FALSE) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         throw std::runtime_error("buffer data corrupted during unmap");
+    }
+
+    if (vertices.size() % 3 != 0) {
+       throw std::invalid_argument("vertex float count must be a multiple of 3");
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
