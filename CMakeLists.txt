@@ -15,6 +15,7 @@ add_executable(kaji
     src/gfx/mesh.cpp
     src/gfx/shader.cpp
     src/gfx/texture.cpp
+    src/gfx/framebuffer.cpp
 )
 
 target_include_directories(kaji PRIVATE
