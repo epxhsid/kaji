@@ -18,7 +18,6 @@ GLenum to_gl_usage(BufferUsage usage) noexcept {
 
 }
 
-
 Mesh::Mesh(std::span<const float> vertices, BufferUsage usage) {
     gl_usage_ = to_gl_usage(usage);
     const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());

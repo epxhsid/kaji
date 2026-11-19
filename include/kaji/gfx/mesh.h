@@ -23,7 +23,7 @@ public:
     Mesh& operator = (Mesh&& other) noexcept;
 
     void update_orphan(std::span<const float> vertices);
-    void update_mapped(std::span<const float> vertices, bool orphan_whole_buffer = true);
+    void update_mapped(std::span<const float> vertices);
 
     void draw() const;
     GLsizei vertex_count() const noexcept { return vertex_count_; }
