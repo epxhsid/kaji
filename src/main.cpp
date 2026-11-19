@@ -36,7 +36,6 @@ int main() {
              0.3f,  0.4f, 0.0f
         };
 
-        std::this_thread::sleep_for(std::chrono::seconds(4));
         waveform_mesh->update_orphan(updated_verts);
 
         app.add_render_item(shader, std::move(waveform_mesh));
