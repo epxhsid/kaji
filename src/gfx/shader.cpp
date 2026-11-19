@@ -1,5 +1,6 @@
 #include "kaji/gfx/shader.h"
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -38,8 +39,9 @@ Shader::~Shader() {
     }
 }
 
-Shader::Shader(Shader&& other) noexcept : program_id_(other.program_id_) {
+Shader::Shader(Shader&& other) noexcept : program_id_(other.program_id_), location_cache_(std::move(other.location_cache_)) {
     other.program_id_ = 0;
+    other.location_cache_.clear();
 }
 
 Shader& Shader::operator=(Shader&& other) noexcept {
@@ -47,8 +49,12 @@ Shader& Shader::operator=(Shader&& other) noexcept {
         if (program_id_ != 0) {
             glDeleteProgram(program_id_);
         }
+
         program_id_ = other.program_id_;
+        location_cache_ = std::move(other.location_cache_);
+
         other.program_id_ = 0;
+        other.location_cache_.clear();
     }
     return *this;
 }
@@ -108,7 +114,14 @@ GLint Shader::uniform_location(std::string_view name) {
     }
 
     const GLint loc = glGetUniformLocation(program_id_, key.c_str());
-    location_cache_.emplace(std::move(key), loc);
+    location_cache_.emplace(key, loc);
+
+    #ifndef NDEBUG
+    if (loc == -1) {
+        std::cerr << "uniform '" << key << "' not found in shader program\n";
+    }
+    #endif
+
     return loc;
 }
 
