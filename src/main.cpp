@@ -26,7 +26,7 @@ int main() {
             -0.3f,  0.4f, 0.0f
         };
 
-        waveform_mesh->update_mapped(initial_verts, true);
+        waveform_mesh->update_mapped(initial_verts);
 
         std::vector<float> updated_verts = {
              0.0f, -0.4f, 0.0f,
