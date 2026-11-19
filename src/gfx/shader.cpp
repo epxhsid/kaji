@@ -65,6 +65,52 @@ GLuint Shader::id() const {
     return program_id_;
 }
 
+void Shader::set_int(std::string_view name, int value) {
+    const GLint loc = uniform_location(name);
+    if (loc != -1) {
+        glUniform1i(loc, value);
+    }
+}
+
+void Shader::set_float(std::string_view name, float value) {
+    const GLint loc = uniform_location(name);
+    if (loc != -1) {
+        glUniform1f(loc, value);
+    }
+}
+
+void Shader::set_vec2(std::string_view name, float x, float y) {
+    const GLint loc = uniform_location(name);
+    if (loc != -1) {
+        glUniform2f(loc, x, y);
+    }
+}
+
+void Shader::set_vec4(std::string_view name, float r, float g, float b, float a) {
+    const GLint loc = uniform_location(name);
+    if (loc != -1) {
+        glUniform4f(loc, r, g, b, a);
+    }
+}
+
+void Shader::set_mat4_col_major(std::string_view name, const std::array<float, 16>& matrix) {
+    const GLint loc = uniform_location(name);
+    if (loc != -1) {
+        glUniformMatrix4fv(loc, 1, GL_FALSE, matrix.data());
+    }
+}
+
+GLint Shader::uniform_location(std::string_view name) {
+    // std::unordered_map<std::string, ...> needs a null-terminated key for glGetUniformLocation
+    std::string key(name);
+    if (const auto it = location_cache_.find(key); it != location_cache_.end()) {
+        return it->second;
+    }
+
+    const GLint loc = glGetUniformLocation(program_id_, key.c_str());
+    location_cache_.emplace(std::move(key), loc);
+    return loc;
+}
 
 GLuint Shader::compile_shader(GLenum type, const std::string &source) {
     GLuint shader = glCreateShader(type);
