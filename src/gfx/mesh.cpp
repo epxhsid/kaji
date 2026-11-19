@@ -8,12 +8,9 @@ namespace kaji::gfx {
 namespace {
 GLenum to_gl_usage(BufferUsage usage) noexcept {
     switch (usage) {
-        case BufferUsage::Static:
-            return GL_STATIC_DRAW;
-        case BufferUsage::Dynamic:
-            return GL_DYNAMIC_DRAW;
-        case BufferUsage::Stream:
-            return GL_STREAM_DRAW;
+        case BufferUsage::Static: return GL_STATIC_DRAW;
+        case BufferUsage::Dynamic: return GL_DYNAMIC_DRAW;
+        case BufferUsage::Stream: return GL_STREAM_DRAW;
     }
 
     return GL_STATIC_DRAW;
