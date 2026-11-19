@@ -1,22 +1,25 @@
 #include "kaji/gfx/mesh.h"
-#include <vector>
 
 namespace kaji::gfx {
 
-Mesh::Mesh(const std::vector<float>& vertices) {
+namespace {
+GLenum to_gl_usage(BufferUsage usage) noexcept {
+    switch (usage) {
+        case BufferUsage::Dynamic:
+            return GL_DYNAMIC_DRAW;
+        case BufferUsage::Static:
+        default:
+            return GL_STATIC_DRAW;
+    }
+}
+
+}
+
+Mesh::Mesh(std::span<const float> vertices, BufferUsage usage) {
+    gl_usage_ = to_gl_usage(usage);
+    const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
+    init_buffers(byte_size, vertices.data(), gl_usage_);
     vertex_count_ = static_cast<GLsizei>(vertices.size() / 3);
-    glGenVertexArrays(1, &vao_);
-    glGenBuffers(1, &vbo_);
-
-    glBindVertexArray(vao_);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 Mesh::~Mesh() {
