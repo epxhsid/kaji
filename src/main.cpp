@@ -1,5 +1,4 @@
 #include "kaji/application.h"
-#include <chrono>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
