@@ -98,7 +98,7 @@ void Framebuffer::blit_to_default(int dst_x0, int dst_y0, int dst_x1, int dst_y1
 
     glBlitFramebuffer(
         0, 0, color_->width(), color_->height(),
-        dst_x0, dst_y0, dst_x1, dst_y1,
+        dst_x0, dst_y1, dst_x1, dst_y0,  // swapped Y to flip vertically
         GL_COLOR_BUFFER_BIT,
         filter
     );
