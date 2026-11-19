@@ -161,6 +161,4 @@ void Mesh::release() noexcept {
     capacity_bytes_ = 0;
 }
 
-
-
 }
