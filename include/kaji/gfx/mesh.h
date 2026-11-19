@@ -1,6 +1,7 @@
-#include "kaji/shader.h"
+#include "kaji/gfx/shader.h"
 #include <vector>
-namespace kaji {
+
+namespace kaji::gfx {
 class Mesh {
 public:
     explicit Mesh(const std::vector<float>& vertices);

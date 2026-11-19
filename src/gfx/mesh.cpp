@@ -1,7 +1,7 @@
-#include "kaji/mesh.h"
+#include "kaji/gfx/mesh.h"
 #include <vector>
 
-namespace kaji {
+namespace kaji::gfx {
 
 Mesh::Mesh(const std::vector<float>& vertices) {
     vertex_count_ = static_cast<GLsizei>(vertices.size() / 3);

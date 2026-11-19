@@ -1,5 +1,5 @@
 #include "kaji/application.h"
-#include "kaji/shader.h"
+#include "kaji/gfx/shader.h"
 #include <iostream>
 #include <memory>
 
@@ -42,7 +42,7 @@ bool Application::initialize() {
     return true;
 }
 
-void Application::add_render_item(std::shared_ptr<Shader> shader, std::unique_ptr<Mesh> mesh) {
+void Application::add_render_item(std::shared_ptr<gfx::Shader> shader, std::unique_ptr<gfx::Mesh> mesh) {
     render_items_.push_back({std::move(shader), std::move(mesh)});
 }
 

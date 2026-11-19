@@ -12,8 +12,7 @@ add_executable(kaji
     src/application.cpp
     src/main.cpp
     src/mesh.cpp
-    src/shader.cpp
-    src/graphics/persistent_buffer.cpp
+    src/gfx/shader.cpp
 )
 
 target_include_directories(kaji PRIVATE

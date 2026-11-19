@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <string>
 
-namespace kaji {
+namespace kaji::gfx {
 
 class Shader {
 public:

@@ -1,9 +1,9 @@
-#include "kaji/shader.h"
+#include "kaji/gfx/shader.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-namespace kaji {
+namespace kaji::gfx {
 
 Shader::Shader(const std::string& vertex_path, const std::string& fragment_path) {
     std::string vertex_source = read_file(vertex_path);
