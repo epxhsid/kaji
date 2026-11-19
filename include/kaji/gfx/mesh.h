@@ -1,7 +1,6 @@
 #include "kaji/gfx/shader.h"
 #include <cstddef>
 #include <span>
-#include <vector>
 
 namespace kaji::gfx {
 

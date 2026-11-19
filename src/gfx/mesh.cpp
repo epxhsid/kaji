@@ -15,6 +15,7 @@ GLenum to_gl_usage(BufferUsage usage) noexcept {
 
 }
 
+
 Mesh::Mesh(std::span<const float> vertices, BufferUsage usage) {
     gl_usage_ = to_gl_usage(usage);
     const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
@@ -22,10 +23,77 @@ Mesh::Mesh(std::span<const float> vertices, BufferUsage usage) {
     vertex_count_ = static_cast<GLsizei>(vertices.size() / 3);
 }
 
-Mesh::~Mesh() {
-    if (vao_ != 0) glDeleteVertexArrays(1, &vao_);
-    if (vbo_ != 0) glDeleteBuffers(1, &vbo_);
+Mesh::Mesh(std::size_t max_vertices, BufferUsage usage) {
+    gl_usage_ = to_gl_usage(usage);
+    const auto byte_size = static_cast<GLsizeiptr>(max_vertices * 3 * sizeof(float));
+    init_buffers(byte_size, nullptr, gl_usage_);
+    vertex_count_ = 0;
 }
+
+Mesh::~Mesh() {
+    release();
+}
+
+Mesh::Mesh(Mesh&& other) noexcept
+    : vao_(other.vao_), vbo_(other.vbo_),
+      vertex_count_(other.vertex_count_),
+      capacity_bytes_(other.capacity_bytes_),
+      gl_usage_(other.gl_usage_) {
+
+    other.vao_ = 0;
+    other.vbo_ = 0;
+    other.vertex_count_ = 0;
+    other.capacity_bytes_ = 0;
+}
+
+Mesh& Mesh::operator=(Mesh&& other) noexcept {
+    if (this != &other) {
+        release();
+
+        vao_ = other.vao_;
+        vbo_ = other.vbo_;
+        vertex_count_ = other.vertex_count_;
+        capacity_bytes_ = other.capacity_bytes_;
+        gl_usage_ = other.gl_usage_;
+
+        other.vao_ = 0;
+        other.vbo_ = 0;
+        other.vertex_count_ = 0;
+        other.capacity_bytes_ = 0;
+    }
+    return *this;
+}
+
+void Mesh::init_buffers(GLsizeiptr byte_size, const void* initial_data, GLenum gl_usage) {
+    capacity_bytes_ = byte_size;
+
+    glGenVertexArrays(1, &vao_);
+    glGenBuffers(1, &vbo_);
+
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER, byte_size, initial_data, gl_usage);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void Mesh::release() noexcept {
+    if (vbo_ != 0) {
+        glDeleteBuffers(1, &vbo_);
+        vbo_ = 0;
+    }
+    if (vao_ != 0) {
+        glDeleteVertexArrays(1, &vao_);
+        vao_ = 0;
+    }
+    vertex_count_ = 0;
+    capacity_bytes_ = 0;
+}
+
 
 Mesh::Mesh(Mesh&& other) noexcept : vao_(other.vao_), vbo_(other.vbo_), vertex_count_(other.vertex_count_) {
     other.vao_ = 0;
