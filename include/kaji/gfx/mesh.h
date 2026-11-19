@@ -1,44 +1,49 @@
-#include "kaji/gfx/shader.h"
+#pragma once
+
+#include "kaji/gfx/buffer.h"
+#include <GL/glew.h>
 #include <cstddef>
+#include <memory>
 #include <span>
 
 namespace kaji::gfx {
 
-enum class BufferUsage {
-    Static,
-    Dynamic,
-    Stream,
+struct VertexAttribute {
+    GLuint index = 0;
+    GLint components = 3;
+    GLenum type = GL_FLOAT;
+    GLboolean normalized = GL_FALSE;
+    GLsizei stride = 0;
+    std::size_t offset = 0;
 };
 
 class Mesh {
 public:
-
-    Mesh(std::span<const float> vertices, BufferUsage usage = BufferUsage::Static);
-    explicit Mesh(const std::size_t max_vertices, BufferUsage usage = BufferUsage::Dynamic);
+    Mesh(std::shared_ptr<Buffer> vertex_buffer,
+        std::span<const VertexAttribute> layout,
+        GLsizei vertex_count,
+        GLenum draw_mode = GL_TRIANGLES);
     ~Mesh();
 
     Mesh(const Mesh&) = delete;
-    Mesh& operator = (const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
 
     Mesh(Mesh&& other) noexcept;
-    Mesh& operator = (Mesh&& other) noexcept;
+    Mesh& operator=(Mesh&& other) noexcept;
 
-    void update_orphan(std::span<const float> vertices);
-    void update_mapped(std::span<const float> vertices);
+    void set_vertex_count(GLsizei count) noexcept { vertex_count_ = count; }
+    GLsizei vertex_count() const noexcept { return vertex_count_; }
 
     void draw() const;
-    GLsizei vertex_count() const noexcept { return vertex_count_; }
-    std::size_t capacity_floats() const noexcept { return capacity_bytes_ / sizeof(float); }
 
 private:
-    void init_buffers(GLsizeiptr byte_size, const void* initial_data, GLenum gl_usage);
+    void configure_layout(std::span<const VertexAttribute> layout);
     void release() noexcept;
 
+    std::shared_ptr<Buffer> buffer_;
     GLuint vao_ = 0;
-    GLuint vbo_ = 0;
     GLsizei vertex_count_ = 0;
-    GLsizeiptr capacity_bytes_ = 0;
-    GLenum gl_usage_ = GL_STATIC_DRAW;
+    GLenum draw_mode_ = GL_TRIANGLES;
 };
 
 }

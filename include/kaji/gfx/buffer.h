@@ -1,4 +1,6 @@
-#include <GL/gl.h>
+#pragma once
+
+#include <GL/glew.h>
 #include <cstddef>
 #include <span>
 
@@ -12,26 +14,32 @@ enum class BufferUsage {
 
 class Buffer {
 public:
-    Buffer(GLenum target, GLsizeiptr size, BufferUsage usage);
+    Buffer(std::span<const std::byte> data, BufferUsage usage);
+    Buffer(std::size_t capacity_bytes, BufferUsage usage);
     ~Buffer();
 
     Buffer(const Buffer&) = delete;
     Buffer& operator=(const Buffer&) = delete;
 
-    Buffer(Buffer&&) noexcept;
-    Buffer& operator=(Buffer&&) noexcept;
+    Buffer(Buffer&& other) noexcept;
+    Buffer& operator=(Buffer&& other) noexcept;
 
-    void upload(GLintptr offset, std::span<const std::byte> data);
-    void orphan(GLsizeiptr new_size);
-    void* map(GLintptr offset, GLsizeiptr size, GLbitfield flags);
-    void unmap();
+    void bind() const;
+    void unbind() const;
 
-    GLuint id() const noexcept;
-    GLsizeiptr capacity() const noexcept;
+    void update_orphan(std::span<const std::byte> data);
+    void update_mapped(std::span<const std::byte> data);
+
+    GLuint id() const noexcept { return id_; }
+    std::size_t capacity_bytes() const noexcept { return capacity_bytes_; }
 
 private:
+    void allocate(std::size_t bytes, const void* data);
+    void release() noexcept;
+
     GLuint id_ = 0;
-    GLenum target_ = GL_ARRAY_BUFFER;
-    GLsizeiptr capacity_ = 0;
+    std::size_t capacity_bytes_ = 0;
+    GLenum gl_usage_ = GL_STATIC_DRAW;
 };
+
 }
