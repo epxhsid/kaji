@@ -8,25 +8,27 @@ namespace kaji::gfx {
 namespace {
 GLenum to_gl_usage(BufferUsage usage) noexcept {
     switch (usage) {
+        case BufferUsage::Static:
+            return GL_STATIC_DRAW;
         case BufferUsage::Dynamic:
             return GL_DYNAMIC_DRAW;
-        case BufferUsage::Static:
-        default:
-            return GL_STATIC_DRAW;
+        case BufferUsage::Stream:
+            return GL_STREAM_DRAW;
     }
+
+    return GL_STATIC_DRAW;
 }
 
 }
 
 Mesh::Mesh(std::span<const float> vertices, BufferUsage usage) {
-    gl_usage_ = to_gl_usage(usage);
-    const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
-    init_buffers(byte_size, vertices.data(), gl_usage_);
-
     if (vertices.size() % 3 != 0) {
         throw std::invalid_argument("vertex float count must be a multiple of 3");
     }
 
+    gl_usage_ = to_gl_usage(usage);
+    const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
+    init_buffers(byte_size, vertices.data(), gl_usage_);
     vertex_count_ = static_cast<GLsizei>(vertices.size() / 3);
 }
 
@@ -72,6 +74,10 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 }
 
 void Mesh::update_orphan(std::span<const float> vertices) {
+    if (vertices.size() % 3 != 0) {
+        throw std::invalid_argument("vertex float count must be a multiple of 3");
+    }
+
     const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
     const GLsizeiptr alloc_size = (byte_size > capacity_bytes_) ? byte_size : capacity_bytes_;
 
@@ -85,15 +91,15 @@ void Mesh::update_orphan(std::span<const float> vertices) {
         glBufferSubData(GL_ARRAY_BUFFER, 0, byte_size, vertices.data());
     }
 
-    if (vertices.size() % 3 != 0) {
-        throw std::invalid_argument("vertex float count must be a multiple of 3");
-    }
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     vertex_count_ = static_cast<GLsizei>(vertices.size() / 3);
 }
 
 void Mesh::update_mapped(std::span<const float> vertices) {
+    if (vertices.size() % 3 != 0) {
+        throw std::invalid_argument("vertex float count must be a multiple of 3");
+    }
+
     const auto byte_size = static_cast<GLsizeiptr>(vertices.size_bytes());
 
     if (byte_size > capacity_bytes_) {
@@ -120,10 +126,6 @@ void Mesh::update_mapped(std::span<const float> vertices) {
     if (glUnmapBuffer(GL_ARRAY_BUFFER) == GL_FALSE) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         throw std::runtime_error("buffer data corrupted during unmap");
-    }
-
-    if (vertices.size() % 3 != 0) {
-       throw std::invalid_argument("vertex float count must be a multiple of 3");
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

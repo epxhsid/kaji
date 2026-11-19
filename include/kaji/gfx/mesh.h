@@ -7,6 +7,7 @@ namespace kaji::gfx {
 enum class BufferUsage {
     Static,
     Dynamic,
+    Stream,
 };
 
 class Mesh {
