@@ -18,6 +18,7 @@ add_executable(kaji
     src/gfx/texture.cpp
     src/gfx/framebuffer.cpp
     src/math/projection.cpp
+    src/math/ortographic_camera.cpp
 )
 
 target_include_directories(kaji PRIVATE
