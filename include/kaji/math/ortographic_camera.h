@@ -26,8 +26,8 @@ public:
         return Mat4::make_orthographic(
             0.0f,
             static_cast<float>(width_),
-            0.0f,
             static_cast<float>(height_),
+            0.0f,
             near_z_,
             far_z_
         );
