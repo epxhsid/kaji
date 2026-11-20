@@ -7,6 +7,7 @@ project(kaji
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 add_executable(kaji
     src/application.cpp
@@ -35,4 +36,5 @@ target_link_libraries(kaji PRIVATE
     OpenGL::GL
     GLEW::GLEW
     glfw
+    glm::glm
 )
