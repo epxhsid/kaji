@@ -1,5 +1,6 @@
 #include "kaji/application.h"
 #include "kaji/gfx/shader.h"
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
 
@@ -31,6 +32,8 @@ bool Application::initialize() {
     }
 
     glfwMakeContextCurrent(window_);
+    glfwSetWindowUserPointer(window_, this);
+    glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);
 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
@@ -66,6 +69,17 @@ void Application::setup_viewport() {
     glfwGetFramebufferSize(window_, &width_, &height_);
     glViewport(0, 0, width_, height_);
     glClearColor(0.12f, 0.12f, 0.14f, 1.0f);
+}
+
+void Application::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
+    if (application == nullptr) {
+        return;
+    }
+
+    application->width_ = width;
+    application->height_ = height;
+    glViewport(0, 0, width, height);
 }
 
 }

@@ -24,6 +24,7 @@ public:
 
 private:
     void setup_viewport();
+    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     GLFWwindow* window_ = nullptr;
     std::vector<RenderItem> render_items_;
     int width_ = 0;
