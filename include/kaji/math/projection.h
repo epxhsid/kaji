@@ -52,14 +52,14 @@ struct Mat4 {
         return mat;
     }
 
-    inline Mat4 make_translation(float x, float y) noexcept {
+    static Mat4 make_translation(float x, float y) noexcept {
         Mat4 mat = Mat4::identity();
         mat(0, 3) = x;
         mat(1, 3) = y;
         return mat;
     }
 
-    inline Mat4 make_scale(float x, float y) noexcept {
+    static Mat4 make_scale(float x, float y) noexcept {
         Mat4 mat = Mat4::identity();
         mat(0, 0) = x;
         mat(1, 1) = y;
