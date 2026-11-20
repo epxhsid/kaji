@@ -92,6 +92,7 @@ void Application::framebuffer_size_callback(GLFWwindow *window, int width, int h
 
     application->width_ = width;
     application->height_ = height;
+    application->projection_->resize(width, height);
     glViewport(0, 0, width, height);
 }
 
