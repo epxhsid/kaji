@@ -79,6 +79,7 @@ void Application::run() {
 void Application::setup_viewport() {
     glfwSwapInterval(1);
     glfwGetFramebufferSize(window_, &width_, &height_);
+    projection_->resize(width_, height_);
     glViewport(0, 0, width_, height_);
     glClearColor(0.12f, 0.12f, 0.14f, 1.0f);
 }
