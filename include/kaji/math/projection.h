@@ -34,6 +34,23 @@ struct Mat4 {
         }
         return result;
     }
+
+    static Mat4 make_orthographic(float left, float right, float bottom, float top, float near_z, float far_z) noexcept {
+        Mat4 mat = Mat4::identity();
+        const float rl = right - left;
+        const float tb = top - bottom;
+        const float fn = far_z - near_z;
+
+        mat(0, 0) = 2.0f / rl;
+        mat(1, 1) = 2.0f / tb;
+        mat(2, 2) = -2.0f / fn;
+
+        mat(0, 3) = -(right + left) / rl;
+        mat(1, 3) = -(top + bottom) / tb;
+        mat(2, 3) = -(far_z + near_z) / fn;
+        mat(3, 3) = 1.0f;
+        return mat;
+    }
 };
 
 class IProjection {
