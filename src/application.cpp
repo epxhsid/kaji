@@ -1,5 +1,6 @@
 #include "kaji/application.h"
 #include "kaji/gfx/shader.h"
+#include "kaji/math/projection.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
@@ -63,6 +64,9 @@ void Application::run() {
 
         for (const auto& item : render_items_) {
             item.shader->bind();
+            const math::Mat4 projection_matrix = projection_->get_projection_matrix();
+            item.shader->set_mat4_col_major("uProjection", projection_matrix.data);
+            item.shader->set_mat4_col_major("uModel", item.model.data);
             item.mesh->draw();
             item.shader->unbind();
         }
