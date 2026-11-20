@@ -12,6 +12,7 @@ namespace kaji {
 struct RenderItem {
     std::shared_ptr<gfx::Shader> shader;
     std::unique_ptr<gfx::Mesh> mesh;
+    math::Mat4 model = math::Mat4::identity();
 };
 
 class Application {
@@ -20,7 +21,12 @@ public:
     ~Application();
 
     bool initialize();
-    void add_render_item(std::shared_ptr<gfx::Shader> shader, std::unique_ptr<gfx::Mesh> mesh);
+
+    void add_render_item(
+        std::shared_ptr<gfx::Shader> shader,
+        std::unique_ptr<gfx::Mesh> mesh,
+        math::Mat4 model = math::Mat4::identity()
+    );
     void run();
 
 private:
