@@ -36,6 +36,11 @@ struct Mat4 {
     }
 };
 
-
+class IProjection {
+public:
+    virtual ~IProjection() = default;
+    virtual void resize(int width, int height) = 0;
+    virtual Mat4 get_projection_matrix() const = 0;
+};
 
 }
