@@ -49,11 +49,13 @@ bool Application::initialize() {
     return true;
 }
 
-void add_render_item(
-    std::shared_ptr<gfx::Shader> shader,
-    std::unique_ptr<gfx::Mesh> mesh,
-    math::Mat4 model = math::Mat4::identity()
-);
+void Application::add_render_item(std::shared_ptr<gfx::Shader> shader, std::unique_ptr<gfx::Mesh> mesh, math::Mat4 model) {
+    render_items_.push_back({
+        std::move(shader),
+        std::move(mesh),
+        model
+    });
+}
 
 void Application::run() {
     while (!glfwWindowShouldClose(window_)) {
