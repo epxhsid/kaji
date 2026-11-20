@@ -6,7 +6,11 @@
 
 namespace kaji {
 
-Application::Application() = default;
+Application::Application(std::shared_ptr<kaji::math::IProjection> projection) : projection_(std::move(projection)) {
+    if (!projection_) {
+        throw std::invalid_argument("projection cannot be null");
+    }
+}
 
 Application::~Application() {
     render_items_.clear();

@@ -1,6 +1,7 @@
 #pragma once
 #include "kaji/gfx/shader.h"
 #include "kaji/gfx/mesh.h"
+#include "kaji/math/projection.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <memory>
@@ -15,7 +16,7 @@ struct RenderItem {
 
 class Application {
 public:
-    Application();
+    Application(std::shared_ptr<kaji::math::IProjection> projection);
     ~Application();
 
     bool initialize();
@@ -25,6 +26,7 @@ public:
 private:
     void setup_viewport();
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    std::shared_ptr<kaji::math::IProjection> projection_;
     GLFWwindow* window_ = nullptr;
     std::vector<RenderItem> render_items_;
     int width_ = 0;
