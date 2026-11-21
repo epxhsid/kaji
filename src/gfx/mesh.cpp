@@ -120,6 +120,7 @@ void Mesh::configure_layout(std::span<const VertexAttribute> layout) {
 
     for (const auto& attr : layout) {
         const auto* offset_ptr = reinterpret_cast<const void*>(attr.offset);
+
         glVertexAttribPointer(
             attr.index,
             attr.components,
@@ -128,10 +129,16 @@ void Mesh::configure_layout(std::span<const VertexAttribute> layout) {
             attr.stride,
             offset_ptr
         );
+
         glEnableVertexAttribArray(attr.index);
     }
 
     buffer_->unbind();
+
+    if (index_buffer_) {
+        index_buffer_->bind();
+    }
+
     glBindVertexArray(0);
 }
 
@@ -140,7 +147,13 @@ void Mesh::release() noexcept {
         glDeleteVertexArrays(1, &vao_);
         vao_ = 0;
     }
+
     vertex_count_ = 0;
+    index_count_ = 0;
+    index_type_ = GL_UNSIGNED_INT;
+    draw_mode_ = GL_TRIANGLES;
+
+    index_buffer_.reset();
     buffer_.reset();
 }
 
