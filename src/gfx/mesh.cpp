@@ -62,11 +62,17 @@ Mesh::~Mesh() {
 
 Mesh::Mesh(Mesh&& other) noexcept
     : buffer_(std::move(other.buffer_)),
+      index_buffer_(std::move(other.index_buffer_)),
       vao_(other.vao_),
       vertex_count_(other.vertex_count_),
+      index_count_(other.index_count_),
+      index_type_(other.index_type_),
       draw_mode_(other.draw_mode_) {
+
     other.vao_ = 0;
     other.vertex_count_ = 0;
+    other.index_count_ = 0;
+    other.index_type_ = GL_UNSIGNED_INT;
     other.draw_mode_ = GL_TRIANGLES;
 }
 
