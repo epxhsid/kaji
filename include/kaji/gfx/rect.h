@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 namespace kaji::gfx {
 
 struct Rect {
@@ -30,6 +31,7 @@ public:
     void clear();
 
     Rect current() const noexcept;
+
 private:
     void apply() const;
 
@@ -40,13 +42,13 @@ private:
 
 class ScopedClip {
 public:
-    ScopedClip(ClipRect& clip_rect, const Rect& rect);
+    ScopedClip(ClipRect& clip, const Rect& rect);
     ~ScopedClip();
 
     ScopedClip(const ScopedClip&) = delete;
     ScopedClip& operator=(const ScopedClip&) = delete;
 private:
-    ClipRect& clip_;
+    ClipRect* clip_;
 };
 
 }
