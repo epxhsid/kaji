@@ -22,8 +22,8 @@ Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribut
     configure_layout(layout);
 }
 
-Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribute> layout, std::shared_ptr<Buffer> index_buffer, GLsizei vertex_count, GLenum index_type, GLenum draw_mode)
-    : buffer_(std::move(vertex_buffer)), index_buffer_(std::move(index_buffer)), vertex_count_(vertex_count), index_type_(index_type), draw_mode_(draw_mode) {
+Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribute> layout, std::shared_ptr<Buffer> index_buffer, GLsizei index_count, GLenum index_type, GLenum draw_mode)
+    : buffer_(std::move(vertex_buffer)), index_buffer_(std::move(index_buffer)), vertex_count_(index_count), index_type_(index_type), draw_mode_(draw_mode) {
     if (!buffer_) {
         throw std::invalid_argument("mesh requires a valid vertex buffer");
     }
@@ -34,14 +34,6 @@ Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribut
         );
     }
 
-    if (vertex_count_ <= 0) {
-        throw std::invalid_argument("mesh requires a valid vertex count");
-    }
-
-    if (layout.empty()) {
-        throw std::invalid_argument("mesh requires a valid vertex layout");
-    }
-
     if (!index_buffer_) {
         throw std::invalid_argument("mesh requires a valid index buffer");
     }
@@ -50,6 +42,14 @@ Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribut
         throw std::invalid_argument(
             "mesh index buffer must use BufferTarget::ElementArrayBuffer"
         );
+    }
+
+    if (index_count_ <= 0) {
+        throw std::invalid_argument("indexed mesh requires a valid index count");
+    }
+
+    if (layout.empty()) {
+        throw std::invalid_argument("mesh requires a valid vertex layout");
     }
 
     glGenVertexArrays(1, &vao_);
