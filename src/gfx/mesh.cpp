@@ -104,7 +104,13 @@ void Mesh::draw() const {
     }
 
     glBindVertexArray(vao_);
-    glDrawArrays(draw_mode_, 0, vertex_count_);
+
+    if (index_buffer_ && index_count_ > 0) {
+        glDrawElements(draw_mode_, index_count_, index_type_, nullptr);
+        glBindVertexArray(0);
+        return;
+    }
+
     glBindVertexArray(0);
 }
 
