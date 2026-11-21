@@ -1,6 +1,7 @@
 #include "kaji/gfx/mesh.h"
 #include <memory>
 #include <span>
+#include <stdexcept>
 
 namespace kaji::gfx {
 Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribute> layout, GLsizei vertex_count, GLenum draw_mode)
@@ -23,7 +24,7 @@ Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribut
 }
 
 Mesh::Mesh(std::shared_ptr<Buffer> vertex_buffer, std::span<const VertexAttribute> layout, std::shared_ptr<Buffer> index_buffer, GLsizei index_count, GLenum index_type, GLenum draw_mode)
-    : buffer_(std::move(vertex_buffer)), index_buffer_(std::move(index_buffer)), vertex_count_(index_count), index_type_(index_type), draw_mode_(draw_mode) {
+    : buffer_(std::move(vertex_buffer)), index_buffer_(std::move(index_buffer)), vertex_count_(0), index_count_(index_count), index_type_(index_type), draw_mode_(draw_mode) {
     if (!buffer_) {
         throw std::invalid_argument("mesh requires a valid vertex buffer");
     }
@@ -99,16 +100,18 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 }
 
 void Mesh::draw() const {
-    if (vertex_count_ <= 0 || vao_ == 0) {
+    if (vao_ == 0) {
         return;
     }
 
     glBindVertexArray(vao_);
 
-    if (index_buffer_ && index_count_ > 0) {
-        glDrawElements(draw_mode_, index_count_, index_type_, nullptr);
-        glBindVertexArray(0);
-        return;
+    if (index_buffer_) {
+        if (index_count_ > 0) {
+            glDrawElements(draw_mode_, index_count_, index_type_, nullptr);
+        }
+    } else if (vertex_count_ > 0) {
+        glDrawArrays(draw_mode_, 0, vertex_count_);
     }
 
     glBindVertexArray(0);
