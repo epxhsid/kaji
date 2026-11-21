@@ -11,16 +11,17 @@ find_package(glm CONFIG REQUIRED)
 
 add_executable(kaji
     src/application.cpp
+    src/input.cpp
     src/main.cpp
+    src/gfx/blend_state.cpp
     src/gfx/buffer.cpp
+    src/gfx/framebuffer.cpp
     src/gfx/mesh.cpp
+    src/gfx/rect.cpp
     src/gfx/shader.cpp
     src/gfx/texture.cpp
-    src/gfx/framebuffer.cpp
-    src/math/projection.cpp
     src/math/ortographic_camera.cpp
-    src/gfx/rect.cpp
-    src/gfx/blend_state.cpp
+    src/math/projection.cpp
 )
 
 target_include_directories(kaji PRIVATE

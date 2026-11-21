@@ -40,6 +40,10 @@ bool Application::initialize() {
     glfwMakeContextCurrent(window_);
     glfwSetWindowUserPointer(window_, this);
     glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window_, InputState::cursor_position_callback);
+    glfwSetMouseButtonCallback(window_, InputState::mouse_button_callback);
+    glfwSetKeyCallback(window_, InputState::key_callback);
+    glfwSetScrollCallback(window_, InputState::scroll_callback);
 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
@@ -61,6 +65,13 @@ void Application::add_render_item(std::shared_ptr<gfx::Shader> shader, std::uniq
 
 void Application::run() {
     while (!glfwWindowShouldClose(window_)) {
+        input_.begin_frame();
+        glfwPollEvents();
+
+        if (glfwWindowShouldClose(window_)) {
+            break;
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         for (const auto& item : render_items_) {
@@ -73,7 +84,6 @@ void Application::run() {
         }
 
         glfwSwapBuffers(window_);
-        glfwPollEvents();
     }
 }
 
