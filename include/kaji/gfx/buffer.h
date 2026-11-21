@@ -19,8 +19,11 @@ enum class BufferTarget {
 
 class Buffer {
 public:
-    Buffer(std::span<const std::byte> data, BufferUsage usage);
-    Buffer(std::size_t capacity_bytes, BufferUsage usage);
+
+    Buffer(std::span<const std::byte> data, BufferUsage usage, BufferTarget target = BufferTarget::ArrayBuffer);
+    Buffer(std::size_t capacity_bytes, BufferUsage usage, BufferTarget target = BufferTarget::ArrayBuffer);
+    BufferTarget target() const noexcept;
+
     ~Buffer();
 
     Buffer(const Buffer&) = delete;
@@ -45,6 +48,8 @@ private:
     GLuint id_ = 0;
     std::size_t capacity_bytes_ = 0;
     GLenum gl_usage_ = GL_STATIC_DRAW;
+    BufferTarget target_ = BufferTarget::ArrayBuffer;
+    GLenum gl_target_ = GL_ARRAY_BUFFER;
 };
 
 }
