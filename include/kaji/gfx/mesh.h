@@ -19,9 +19,17 @@ struct VertexAttribute {
 
 class Mesh {
 public:
+
     Mesh(std::shared_ptr<Buffer> vertex_buffer,
         std::span<const VertexAttribute> layout,
         GLsizei vertex_count,
+        GLenum draw_mode = GL_TRIANGLES);
+
+    Mesh(std::shared_ptr<Buffer> vertex_buffer,
+        std::span<const VertexAttribute> layout,
+        std::shared_ptr<Buffer> index_buffer,
+        GLsizei index_count,
+        GLenum index_type = GL_UNSIGNED_INT,
         GLenum draw_mode = GL_TRIANGLES);
     ~Mesh();
 
@@ -44,6 +52,9 @@ private:
     GLuint vao_ = 0;
     GLsizei vertex_count_ = 0;
     GLenum draw_mode_ = GL_TRIANGLES;
+    std::shared_ptr<Buffer> index_buffer_;
+    GLsizei index_count_ = 0;
+    GLenum index_type_ = GL_UNSIGNED_INT;
 };
 
 }
