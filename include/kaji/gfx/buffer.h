@@ -12,6 +12,11 @@ enum class BufferUsage {
     StreamDraw
 };
 
+enum class BufferTarget {
+    ArrayBuffer,
+    ElementArrayBuffer
+};
+
 class Buffer {
 public:
     Buffer(std::span<const std::byte> data, BufferUsage usage);
