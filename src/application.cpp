@@ -1,4 +1,5 @@
 #include "kaji/application.h"
+#include "kaji/gfx/blend_state.h"
 #include "kaji/gfx/shader.h"
 #include "kaji/math/projection.h"
 #include <GLFW/glfw3.h>
@@ -82,6 +83,8 @@ void Application::setup_viewport() {
     projection_->resize(width_, height_);
     glViewport(0, 0, width_, height_);
     glClearColor(0.12f, 0.12f, 0.14f, 1.0f);
+
+    gfx::BlendState::enable_alpha();
 }
 
 void Application::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
