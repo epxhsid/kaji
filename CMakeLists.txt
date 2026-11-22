@@ -23,6 +23,7 @@ add_executable(kaji
     src/math/ortographic_camera.cpp
     src/math/projection.cpp
     src/ui/component.cpp
+    src/ui/batcher.cpp
 )
 
 #[[

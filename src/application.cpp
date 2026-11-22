@@ -7,11 +7,11 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 namespace kaji {
 
-Application::Application(std::shared_ptr<kaji::math::IProjection> projection)
-    : projection_(std::move(projection)) {
+Application::Application(std::shared_ptr<kaji::math::IProjection> projection) : projection_(std::move(projection)) {
     if (!projection_) {
         throw std::invalid_argument("projection cannot be null");
     }
@@ -22,6 +22,8 @@ Application::~Application() {
 }
 
 void Application::shutdown() noexcept {
+    ui_batcher_.reset();
+    ui_shader_.reset();
     ui_root_.reset();
 
     if (window_ != nullptr) {
@@ -95,11 +97,7 @@ bool Application::initialize() {
     return true;
 }
 
-void Application::add_render_item(
-    std::shared_ptr<gfx::Shader> shader,
-    std::unique_ptr<gfx::Mesh> mesh,
-    math::Mat4 model
-) {
+void Application::add_render_item(std::shared_ptr<gfx::Shader> shader, std::unique_ptr<gfx::Mesh> mesh, math::Mat4 model) {
     render_items_.push_back({
         std::move(shader),
         std::move(mesh),
@@ -131,20 +129,21 @@ void Application::run() {
         }
 
         dispatch_ui_input();
-
         glClear(GL_COLOR_BUFFER_BIT);
 
         for (const auto& item : render_items_) {
             item.shader->bind();
-            const math::Mat4 projection_matrix =
-                projection_->get_projection_matrix();
-            item.shader->set_mat4_col_major(
-                "uProjection",
-                projection_matrix.data
-            );
+            const math::Mat4 projection_matrix = projection_->get_projection_matrix();
+            item.shader->set_mat4_col_major("uProjection", projection_matrix.data);
             item.shader->set_mat4_col_major("uModel", item.model.data);
             item.mesh->draw();
             item.shader->unbind();
+        }
+
+        if (ui_batcher_ && ui_root_) {
+            ui_batcher_->begin();
+            ui_root_->paint(*ui_batcher_);
+            ui_batcher_->flush(projection_->get_projection_matrix());
         }
 
         glfwSwapBuffers(window_);
@@ -160,14 +159,18 @@ void Application::setup_viewport() {
 
     gfx::BlendState::enable_alpha();
 
+    const std::string ui_vert = std::string(KAJI_SHADER_DIR) + "/ui.vert";
+    const std::string ui_frag = std::string(KAJI_SHADER_DIR) + "/ui.frag";
+    ui_shader_ = std::make_shared<gfx::Shader>(ui_vert, ui_frag);
+    ui_batcher_ = std::make_unique<ui::UIBatcher>(ui_shader_);
+
     if (ui_root_) {
         ui_root_->layout(gfx::Rect{0, 0, width_, height_});
     }
 }
 
 void Application::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    auto* application =
-        static_cast<Application*>(glfwGetWindowUserPointer(window));
+    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
     if (application == nullptr) {
         return;
     }
@@ -207,17 +210,14 @@ void Application::dispatch_ui_input() noexcept {
         if (input_.mouse_released(MouseButton::Left)) {
             captured_ui_element_->on_mouse_release(MouseButton::Left);
 
-            if (captured_ui_element_->hit_test(
-                    input_.mouse_x(), input_.mouse_y())) {
+            if (captured_ui_element_->hit_test(input_.mouse_x(), input_.mouse_y())) {
                 captured_ui_element_->set_state(ui::ComponentState::Hovered);
             } else {
                 captured_ui_element_->set_state(ui::ComponentState::Normal);
             }
 
             captured_ui_element_ = nullptr;
-            hit = ui_root_->hit_test_element(
-                input_.mouse_x(), input_.mouse_y()
-            );
+            hit = ui_root_->hit_test_element(input_.mouse_x(), input_.mouse_y());
         }
     }
 

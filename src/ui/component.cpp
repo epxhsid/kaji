@@ -204,11 +204,9 @@ void Panel::layout(const gfx::Rect& available) {
 
         const LayoutStyle& child_style = child->style();
 
-        if (style_.direction == LayoutDirection::Row
-            && child_style.width.mode == SizeMode::Fill) {
+        if (style_.direction == LayoutDirection::Row && child_style.width.mode == SizeMode::Fill) {
             ++fill_count;
-        } else if (style_.direction == LayoutDirection::Column
-            && child_style.height.mode == SizeMode::Fill) {
+        } else if (style_.direction == LayoutDirection::Column && child_style.height.mode == SizeMode::Fill) {
             ++fill_count;
         }
 
@@ -278,13 +276,9 @@ void Panel::layout(const gfx::Rect& available) {
             int slot_height = 0;
 
             if (child_style.height.mode == SizeMode::Fill) {
-                slot_height = fill_count > 0
-                    ? remaining / static_cast<int>(fill_count)
-                    : 0;
+                slot_height = fill_count > 0 ? remaining / static_cast<int>(fill_count) : 0;
             } else {
-                slot_height = child_style.height.value
-                    + child_style.margin.top
-                    + child_style.margin.bottom;
+                slot_height = child_style.height.value + child_style.margin.top + child_style.margin.bottom;
             }
 
             child->layout(gfx::Rect{
@@ -319,6 +313,38 @@ void Panel::update(const kaji::InputState& input) {
     for (const auto& child : children_) {
         if (child->visible()) {
             child->update(input);
+        }
+    }
+}
+
+void UIElement::paint(UIBatcher& batcher) const {
+    if (!visible_ || bounds_.empty()) {
+        return;
+    }
+
+    Color color = style_.background;
+
+    if (!enabled_) {
+        color.a *= 0.5f;
+    } else if (state_ == ComponentState::Hovered) {
+        color.r = std::min(1.0f, color.r + 0.08f);
+        color.g = std::min(1.0f, color.g + 0.08f);
+        color.b = std::min(1.0f, color.b + 0.08f);
+    } else if (state_ == ComponentState::Pressed) {
+        color.r = std::max(0.0f, color.r - 0.05f);
+        color.g = std::max(0.0f, color.g - 0.05f);
+        color.b = std::max(0.0f, color.b - 0.05f);
+    }
+
+    batcher.quad(bounds_, color);
+}
+
+void Panel::paint(UIBatcher& batcher) const {
+    UIElement::paint(batcher);
+
+    for (const auto& child : children_) {
+        if (child->visible()) {
+            child->paint(batcher);
         }
     }
 }

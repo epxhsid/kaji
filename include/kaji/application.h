@@ -50,6 +50,8 @@ private:
     GLFWwindow* window_ = nullptr;
     std::vector<RenderItem> render_items_;
     std::unique_ptr<ui::UIElement> ui_root_;
+    std::shared_ptr<gfx::Shader> ui_shader_;
+    std::unique_ptr<ui::UIBatcher> ui_batcher_;
     InputState input_;
     int width_ = 0;
     int height_ = 0;

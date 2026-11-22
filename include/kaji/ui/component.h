@@ -1,7 +1,9 @@
 #pragma once
 
+#include <GL/glew.h>
 #include "kaji/gfx/rect.h"
 #include "kaji/input.h"
+#include "kaji/ui/batcher.h"
 #include <memory>
 #include <vector>
 
@@ -36,6 +38,7 @@ struct LayoutStyle {
     Insets padding{};
     LayoutDirection direction = LayoutDirection::Column;
     int gap = 0;
+    Color background = Color{0.16f, 0.16f, 0.18f, 1.0f};
 };
 
 class UIElement {
@@ -71,6 +74,8 @@ public:
     virtual void on_mouse_release(kaji::MouseButton button);
     virtual void on_mouse_drag(double dx, double dy);
 
+    virtual void paint(UIBatcher& batcher) const;
+
 protected:
     gfx::Rect bounds_{0, 0, 0, 0};
     LayoutStyle style_{};
@@ -95,6 +100,7 @@ public:
     void layout(const gfx::Rect& available) override;
     UIElement* hit_test_element(double x, double y) noexcept override;
     void update(const kaji::InputState& input) override;
+    void paint(UIBatcher& batcher) const override;
 
 private:
     std::vector<std::unique_ptr<UIElement>> children_;
