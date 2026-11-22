@@ -16,17 +16,39 @@ bool Rect::empty() const noexcept {
     return width <= 0 || height <= 0;
 }
 
-Rect Rect::intersect(const Rect &other) const noexcept {
+bool Rect::contains(double point_x, double point_y) const noexcept {
+    return !empty()
+        && point_x >= x
+        && point_x < right()
+        && point_y >= y
+        && point_y < bottom();
+}
+
+Rect Rect::inset(int left, int top, int right_inset, int bottom_inset) const noexcept {
+    const int inset_left = std::max(0, left);
+    const int inset_top = std::max(0, top);
+    const int inset_right = std::max(0, right_inset);
+    const int inset_bottom = std::max(0, bottom_inset);
+
+    return Rect{
+        x + inset_left,
+        y + inset_top,
+        std::max(0, width - inset_left - inset_right),
+        std::max(0, height - inset_top - inset_bottom)
+    };
+}
+
+Rect Rect::intersect(const Rect& other) const noexcept {
     const int left = std::max(x, other.x);
     const int top = std::max(y, other.y);
-    const int right = std::min(Rect::right(), other.right());
-    const int bottom = std::min(Rect::bottom(), other.bottom());
+    const int right_edge = std::min(Rect::right(), other.right());
+    const int bottom_edge = std::min(Rect::bottom(), other.bottom());
 
-    if (left >= right || top >= bottom) {
-        return Rect();
+    if (left >= right_edge || top >= bottom_edge) {
+        return Rect{};
     }
 
-    return Rect(left, top, right - left, bottom - top);
+    return Rect{left, top, right_edge - left, bottom_edge - top};
 }
 
 ClipRect::ClipRect(int framebuffer_width, int framebuffer_height)
@@ -56,6 +78,7 @@ void ClipRect::pop() {
     }
 
     stack_.pop_back();
+
     if (stack_.empty()) {
         glScissor(0, 0, framebuffer_width_, framebuffer_height_);
         glDisable(GL_SCISSOR_TEST);
@@ -65,14 +88,18 @@ void ClipRect::pop() {
     apply();
 }
 
+void ClipRect::clear() {
+    stack_.clear();
+    glScissor(0, 0, framebuffer_width_, framebuffer_height_);
+    glDisable(GL_SCISSOR_TEST);
+}
+
 Rect ClipRect::current() const noexcept {
     if (stack_.empty()) {
-        return Rect(0, 0, framebuffer_width_, framebuffer_height_);
+        return Rect{0, 0, framebuffer_width_, framebuffer_height_};
     }
 
-    Rect result{
-        0, 0, framebuffer_width_, framebuffer_height_
-    };
+    Rect result{0, 0, framebuffer_width_, framebuffer_height_};
 
     for (const Rect& rect : stack_) {
         result = result.intersect(rect);
@@ -93,7 +120,6 @@ void ClipRect::apply() const {
     }
 
     const int gl_y = framebuffer_height_ - rect.y - rect.height;
-
     glScissor(rect.x, gl_y, rect.width, rect.height);
 }
 

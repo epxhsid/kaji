@@ -3,6 +3,7 @@
 #include "kaji/gfx/mesh.h"
 #include "kaji/math/projection.h"
 #include "kaji/input.h"
+#include "kaji/ui/component.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <memory>
@@ -30,6 +31,8 @@ public:
         math::Mat4 model = math::Mat4::identity()
     );
 
+    void set_ui_root(std::unique_ptr<ui::UIElement> root);
+
     InputState& input() noexcept { return input_; }
     const InputState& input() const noexcept { return input_; }
 
@@ -42,6 +45,7 @@ private:
     std::shared_ptr<kaji::math::IProjection> projection_;
     GLFWwindow* window_ = nullptr;
     std::vector<RenderItem> render_items_;
+    std::unique_ptr<ui::UIElement> ui_root_;
     InputState input_;
     int width_ = 0;
     int height_ = 0;

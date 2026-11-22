@@ -22,6 +22,7 @@ add_executable(kaji
     src/gfx/texture.cpp
     src/math/ortographic_camera.cpp
     src/math/projection.cpp
+    src/ui/component.cpp
 )
 
 #[[

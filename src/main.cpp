@@ -1,15 +1,17 @@
 #include "kaji/application.h"
 #include "kaji/math/ortographic_camera.h"
+#include "kaji/ui/component.h"
+
 #include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <memory>
-#include <string>
 #include <utility>
 
 int main() {
     try {
-        auto projection = std::make_shared<kaji::math::OrthographicCamera2D>(1280, 780);
+        auto projection =
+            std::make_shared<kaji::math::OrthographicCamera2D>(1280, 780);
         kaji::Application app(std::move(projection));
 
         if (!app.initialize()) {
@@ -17,49 +19,40 @@ int main() {
             return EXIT_FAILURE;
         }
 
-        const std::string vert_path = std::string(KAJI_SHADER_DIR) + "/triangle.vert";
-        const std::string frag_path = std::string(KAJI_SHADER_DIR) + "/triangle.frag";
+        kaji::ui::LayoutStyle root_style;
+        root_style.width = kaji::ui::Length::fill();
+        root_style.height = kaji::ui::Length::fill();
+        root_style.padding = kaji::ui::Insets::all(16);
+        root_style.direction = kaji::ui::LayoutDirection::Column;
+        root_style.gap = 8;
 
-        auto shader = std::make_shared<kaji::gfx::Shader>(vert_path, frag_path);
+        auto root = std::make_unique<kaji::ui::Panel>(root_style);
 
-        std::vector<float> vertices = {
-            -0.5f, 0.5f, 0.0f,
-            0.5f, 0.5f, 0.0f,
-            0.0f,  -0.5f, 0.0f
-        };
+        kaji::ui::LayoutStyle header_style;
+        header_style.width = kaji::ui::Length::fill();
+        header_style.height = kaji::ui::Length::fixed(80);
 
-        auto vertex_buffer = std::make_shared<kaji::gfx::Buffer>(
-            std::as_bytes(std::span<const float>(vertices)),
-            kaji::gfx::BufferUsage::StaticDraw
+        kaji::ui::LayoutStyle lane_style;
+        lane_style.width = kaji::ui::Length::fill();
+        lane_style.height = kaji::ui::Length::fill();
+
+        auto* header = root->add_child(
+            std::make_unique<kaji::ui::Panel>(header_style)
+        );
+        auto* lanes = root->add_child(
+            std::make_unique<kaji::ui::Panel>(lane_style)
         );
 
-        std::array<kaji::gfx::VertexAttribute, 1> layout {{
-            {
-                .index = 0,
-                .components = 3,
-                .type = GL_FLOAT,
-                .normalized = GL_FALSE,
-                .stride = static_cast<GLsizei>(3 * sizeof(float)),
-                .offset = 0
-            }
-        }};
+        app.set_ui_root(std::move(root));
 
-        auto mesh = std::make_unique<kaji::gfx::Mesh>(
-            vertex_buffer,
-            layout,
-            static_cast<GLsizei>(vertices.size() / 3)
-        );
+        if (header == nullptr || lanes == nullptr) {
+            throw std::runtime_error("failed to create layout demo");
+        }
 
-        const kaji::math::Mat4 scale = kaji::math::Mat4::make_scale(400.0f, 300.0f);
-        const kaji::math::Mat4 offset = kaji::math::Mat4::make_translation(640.0f, 390.0f);
-        const kaji::math::Mat4 model = offset * scale;
-
-        app.add_render_item(shader, std::move(mesh), model);
         app.run();
-
         return EXIT_SUCCESS;
     } catch (const std::exception& e) {
-        std::cerr << "fatal error: " << e.what() << "\n";
+        std::cerr << "fatal error: " << e.what() << '\n';
         return EXIT_FAILURE;
     }
 }
