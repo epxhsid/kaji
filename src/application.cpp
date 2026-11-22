@@ -5,19 +5,52 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 
 namespace kaji {
 
-Application::Application(std::shared_ptr<kaji::math::IProjection> projection) : projection_(std::move(projection)) {
+Application::Application(std::shared_ptr<kaji::math::IProjection> projection)
+    : projection_(std::move(projection)) {
     if (!projection_) {
         throw std::invalid_argument("projection cannot be null");
     }
 }
 
 Application::~Application() {
-    render_items_.clear();
-    if (window_ != nullptr) glfwDestroyWindow(window_);
-    glfwTerminate();
+    shutdown();
+}
+
+void Application::shutdown() noexcept {
+    if (window_ != nullptr) {
+        glfwMakeContextCurrent(window_);
+
+        glUseProgram(0);
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_BLEND);
+        glDisable(GL_SCISSOR_TEST);
+
+        glfwSetCursorPosCallback(window_, nullptr);
+        glfwSetMouseButtonCallback(window_, nullptr);
+        glfwSetKeyCallback(window_, nullptr);
+        glfwSetScrollCallback(window_, nullptr);
+        glfwSetFramebufferSizeCallback(window_, nullptr);
+
+        render_items_.clear();
+        glfwSetWindowUserPointer(window_, nullptr);
+        glfwMakeContextCurrent(nullptr);
+        glfwDestroyWindow(window_);
+        window_ = nullptr;
+    } else {
+        render_items_.clear();
+    }
+
+    if (glfw_initialized_) {
+        glfwTerminate();
+        glfw_initialized_ = false;
+    }
 }
 
 bool Application::initialize() {
@@ -26,6 +59,7 @@ bool Application::initialize() {
         std::cerr << "failed to initialize GLFW\n";
         return false;
     }
+    glfw_initialized_ = true;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -34,6 +68,8 @@ bool Application::initialize() {
     window_ = glfwCreateWindow(1280, 780, "kaji", nullptr, nullptr);
     if (window_ == nullptr) {
         std::cerr << "failed to create window\n";
+        glfwTerminate();
+        glfw_initialized_ = false;
         return false;
     }
 
@@ -48,6 +84,7 @@ bool Application::initialize() {
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cerr << "failed to initialize opengl extension\n";
+        shutdown();
         return false;
     }
 
@@ -55,7 +92,11 @@ bool Application::initialize() {
     return true;
 }
 
-void Application::add_render_item(std::shared_ptr<gfx::Shader> shader, std::unique_ptr<gfx::Mesh> mesh, math::Mat4 model) {
+void Application::add_render_item(
+    std::shared_ptr<gfx::Shader> shader,
+    std::unique_ptr<gfx::Mesh> mesh,
+    math::Mat4 model
+) {
     render_items_.push_back({
         std::move(shader),
         std::move(mesh),
@@ -64,6 +105,10 @@ void Application::add_render_item(std::shared_ptr<gfx::Shader> shader, std::uniq
 }
 
 void Application::run() {
+    if (window_ == nullptr) {
+        return;
+    }
+
     while (!glfwWindowShouldClose(window_)) {
         input_.begin_frame();
         glfwPollEvents();
@@ -76,8 +121,12 @@ void Application::run() {
 
         for (const auto& item : render_items_) {
             item.shader->bind();
-            const math::Mat4 projection_matrix = projection_->get_projection_matrix();
-            item.shader->set_mat4_col_major("uProjection", projection_matrix.data);
+            const math::Mat4 projection_matrix =
+                projection_->get_projection_matrix();
+            item.shader->set_mat4_col_major(
+                "uProjection",
+                projection_matrix.data
+            );
             item.shader->set_mat4_col_major("uModel", item.model.data);
             item.mesh->draw();
             item.shader->unbind();
@@ -97,8 +146,13 @@ void Application::setup_viewport() {
     gfx::BlendState::enable_alpha();
 }
 
-void Application::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
+void Application::framebuffer_size_callback(
+    GLFWwindow* window,
+    int width,
+    int height
+) {
+    auto* application =
+        static_cast<Application*>(glfwGetWindowUserPointer(window));
     if (application == nullptr) {
         return;
     }

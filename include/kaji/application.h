@@ -22,6 +22,7 @@ public:
     ~Application();
 
     bool initialize();
+    void shutdown() noexcept;
 
     void add_render_item(
         std::shared_ptr<gfx::Shader> shader,
@@ -44,6 +45,8 @@ private:
     InputState input_;
     int width_ = 0;
     int height_ = 0;
+    bool glfw_initialized_ = false;
+    bool opengl_initialized_ = false;
 };
 
 }
