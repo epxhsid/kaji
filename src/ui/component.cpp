@@ -97,6 +97,42 @@ void UIElement::layout(const gfx::Rect& available) {
     };
 }
 
+bool UIElement::hit_test(double x, double y) const noexcept {
+    return enabled() && visible() && bounds().contains(x, y);
+}
+
+UIElement* UIElement::hit_test_element(double x, double y) noexcept {
+    return hit_test(x, y) ? this : nullptr;
+}
+
+void UIElement::update(const kaji::InputState&) {}
+
+void UIElement::on_mouse_enter() {
+    if (enabled() && state() != ComponentState::Pressed) {
+        set_state(ComponentState::Hovered);
+    }
+}
+
+void UIElement::on_mouse_exit() {
+    if (enabled() && state() != ComponentState::Pressed) {
+        set_state(ComponentState::Normal);
+    }
+}
+
+void UIElement::on_mouse_press(kaji::MouseButton) {
+    if (enabled()) {
+        set_state(ComponentState::Pressed);
+    }
+}
+
+void UIElement::on_mouse_release(kaji::MouseButton) {
+    if (enabled()) {
+        set_state(ComponentState::Hovered);
+    }
+}
+
+void UIElement::on_mouse_drag(double, double) {}
+
 Panel::Panel(LayoutStyle style)
     : UIElement(style) {
 }
@@ -190,10 +226,6 @@ void Panel::layout(const gfx::Rect& available) {
         }
     }
 
-    if (style_.direction == LayoutDirection::Row) {
-        fixed_space -= 0;
-    }
-
     int visible_count = 0;
     for (const auto& child : children_) {
         if (child->visible()) {
@@ -203,29 +235,16 @@ void Panel::layout(const gfx::Rect& available) {
 
     const int gaps = std::max(0, visible_count - 1) * style_.gap;
 
-    int cursor = inner.x;
-    int remaining = inner.width - fixed_space - gaps;
+    int cursor = 0;
+    int remaining = 0;
 
-    if (style_.direction == LayoutDirection::Column) {
-        remaining = inner.height;
-        fixed_space = 0;
-
-        for (const auto& child : children_) {
-            if (!child->visible()) {
-                continue;
-            }
-
-            const LayoutStyle& child_style = child->style();
-            if (child_style.height.mode == SizeMode::Fixed) {
-                fixed_space += child_style.height.value;
-            }
-            fixed_space += child_style.margin.top + child_style.margin.bottom;
-        }
-
+    if (style_.direction == LayoutDirection::Row) {
+        cursor = inner.x;
+        remaining = std::max(0, inner.width - fixed_space - gaps);
+    } else {
+        cursor = inner.y;
         remaining = std::max(0, inner.height - fixed_space - gaps);
     }
-
-    cursor = (style_.direction == LayoutDirection::Row) ? inner.x : inner.y;
 
     for (const auto& child : children_) {
         if (!child->visible()) {
@@ -239,7 +258,7 @@ void Panel::layout(const gfx::Rect& available) {
 
             if (child_style.width.mode == SizeMode::Fill) {
                 slot_width = fill_count > 0
-                    ? std::max(0, remaining / static_cast<int>(fill_count))
+                    ? remaining / static_cast<int>(fill_count)
                     : 0;
             } else {
                 slot_width = child_style.width.value
@@ -247,9 +266,8 @@ void Panel::layout(const gfx::Rect& available) {
                     + child_style.margin.right;
             }
 
-            const int slot_x = cursor;
             child->layout(gfx::Rect{
-                slot_x,
+                cursor,
                 inner.y,
                 slot_width,
                 inner.height
@@ -261,7 +279,7 @@ void Panel::layout(const gfx::Rect& available) {
 
             if (child_style.height.mode == SizeMode::Fill) {
                 slot_height = fill_count > 0
-                    ? std::max(0, remaining / static_cast<int>(fill_count))
+                    ? remaining / static_cast<int>(fill_count)
                     : 0;
             } else {
                 slot_height = child_style.height.value
@@ -269,15 +287,38 @@ void Panel::layout(const gfx::Rect& available) {
                     + child_style.margin.bottom;
             }
 
-            const int slot_y = cursor;
             child->layout(gfx::Rect{
                 inner.x,
-                slot_y,
+                cursor,
                 inner.width,
                 slot_height
             });
 
             cursor += slot_height + style_.gap;
+        }
+    }
+}
+
+UIElement* Panel::hit_test_element(double x, double y) noexcept {
+    if (!hit_test(x, y)) {
+        return nullptr;
+    }
+
+    for (auto it = children_.rbegin(); it != children_.rend(); ++it) {
+        if (UIElement* result = (*it)->hit_test_element(x, y)) {
+            return result;
+        }
+    }
+
+    return this;
+}
+
+void Panel::update(const kaji::InputState& input) {
+    UIElement::update(input);
+
+    for (const auto& child : children_) {
+        if (child->visible()) {
+            child->update(input);
         }
     }
 }

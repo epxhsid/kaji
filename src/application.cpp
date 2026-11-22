@@ -2,6 +2,7 @@
 #include "kaji/gfx/blend_state.h"
 #include "kaji/gfx/shader.h"
 #include "kaji/math/projection.h"
+#include "kaji/ui/component.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
@@ -107,6 +108,8 @@ void Application::add_render_item(
 }
 
 void Application::set_ui_root(std::unique_ptr<ui::UIElement> root) {
+    hovered_ui_element_ = nullptr;
+    captured_ui_element_ = nullptr;
     ui_root_ = std::move(root);
 
     if (ui_root_ && width_ > 0 && height_ > 0) {
@@ -126,6 +129,8 @@ void Application::run() {
         if (glfwWindowShouldClose(window_)) {
             break;
         }
+
+        dispatch_ui_input();
 
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -160,11 +165,7 @@ void Application::setup_viewport() {
     }
 }
 
-void Application::framebuffer_size_callback(
-    GLFWwindow* window,
-    int width,
-    int height
-) {
+void Application::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     auto* application =
         static_cast<Application*>(glfwGetWindowUserPointer(window));
     if (application == nullptr) {
@@ -178,6 +179,69 @@ void Application::framebuffer_size_callback(
 
     if (application->ui_root_) {
         application->ui_root_->layout(gfx::Rect{0, 0, width, height});
+    }
+}
+
+void Application::dispatch_ui_input() noexcept {
+    if (!ui_root_) {
+        hovered_ui_element_ = nullptr;
+        captured_ui_element_ = nullptr;
+        return;
+    }
+
+    ui_root_->update(input_);
+
+    ui::UIElement* hit =
+        ui_root_->hit_test_element(input_.mouse_x(), input_.mouse_y());
+
+    if (captured_ui_element_) {
+        if (input_.mouse_down(MouseButton::Left)) {
+            if (input_.mouse_delta_x() != 0.0 || input_.mouse_delta_y() != 0.0) {
+                captured_ui_element_->on_mouse_drag(
+                    input_.mouse_delta_x(),
+                    input_.mouse_delta_y()
+                );
+            }
+        }
+
+        if (input_.mouse_released(MouseButton::Left)) {
+            captured_ui_element_->on_mouse_release(MouseButton::Left);
+
+            if (captured_ui_element_->hit_test(
+                    input_.mouse_x(), input_.mouse_y())) {
+                captured_ui_element_->set_state(ui::ComponentState::Hovered);
+            } else {
+                captured_ui_element_->set_state(ui::ComponentState::Normal);
+            }
+
+            captured_ui_element_ = nullptr;
+            hit = ui_root_->hit_test_element(
+                input_.mouse_x(), input_.mouse_y()
+            );
+        }
+    }
+
+    if (!captured_ui_element_) {
+        if (hovered_ui_element_ != hit) {
+            if (hovered_ui_element_) {
+                hovered_ui_element_->on_mouse_exit();
+            }
+
+            if (hit) {
+                hit->on_mouse_enter();
+            }
+
+            hovered_ui_element_ = hit;
+        }
+
+        if (input_.mouse_pressed(MouseButton::Left) && hit) {
+            captured_ui_element_ = hit;
+            hit->on_mouse_press(MouseButton::Left);
+        }
+    }
+
+    if (captured_ui_element_) {
+        hovered_ui_element_ = captured_ui_element_;
     }
 }
 

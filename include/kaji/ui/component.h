@@ -1,27 +1,15 @@
 #pragma once
 
 #include "kaji/gfx/rect.h"
+#include "kaji/input.h"
 #include <memory>
 #include <vector>
 
 namespace kaji::ui {
 
-enum class ComponentState {
-    Normal,
-    Hovered,
-    Pressed,
-    Disabled
-};
-
-enum class SizeMode {
-    Fixed,
-    Fill
-};
-
-enum class LayoutDirection {
-    Row,
-    Column
-};
+enum class ComponentState { Normal, Hovered, Pressed, Disabled };
+enum class SizeMode { Fixed, Fill };
+enum class LayoutDirection { Row, Column };
 
 struct Length {
     SizeMode mode = SizeMode::Fixed;
@@ -72,6 +60,16 @@ public:
     const LayoutStyle& style() const noexcept;
 
     virtual void layout(const gfx::Rect& available);
+    virtual bool hit_test(double x, double y) const noexcept;
+    virtual UIElement* hit_test_element(double x, double y) noexcept;
+
+    virtual void update(const kaji::InputState& input);
+
+    virtual void on_mouse_enter();
+    virtual void on_mouse_exit();
+    virtual void on_mouse_press(kaji::MouseButton button);
+    virtual void on_mouse_release(kaji::MouseButton button);
+    virtual void on_mouse_drag(double dx, double dy);
 
 protected:
     gfx::Rect bounds_{0, 0, 0, 0};
@@ -95,6 +93,8 @@ public:
     const UIElement* child(std::size_t index) const noexcept;
 
     void layout(const gfx::Rect& available) override;
+    UIElement* hit_test_element(double x, double y) noexcept override;
+    void update(const kaji::InputState& input) override;
 
 private:
     std::vector<std::unique_ptr<UIElement>> children_;

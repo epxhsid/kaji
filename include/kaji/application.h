@@ -41,6 +41,10 @@ public:
 private:
     void setup_viewport();
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    void dispatch_ui_input() noexcept;
+
+    ui::UIElement* hovered_ui_element_ = nullptr;
+    ui::UIElement* captured_ui_element_ = nullptr;
 
     std::shared_ptr<kaji::math::IProjection> projection_;
     GLFWwindow* window_ = nullptr;
