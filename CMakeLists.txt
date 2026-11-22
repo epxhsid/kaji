@@ -24,6 +24,8 @@ add_executable(kaji
     src/math/projection.cpp
     src/ui/component.cpp
     src/ui/batcher.cpp
+    src/ui/button.cpp
+    include/kaji/transport.h
 )
 
 #[[

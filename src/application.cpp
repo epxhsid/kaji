@@ -208,11 +208,16 @@ void Application::dispatch_ui_input() noexcept {
         }
 
         if (input_.mouse_released(MouseButton::Left)) {
-            captured_ui_element_->on_mouse_release(MouseButton::Left);
+            const bool released_inside = captured_ui_element_->hit_test(
+                input_.mouse_x(),
+                input_.mouse_y()
+            );
 
-            if (captured_ui_element_->hit_test(input_.mouse_x(), input_.mouse_y())) {
+            if (released_inside) {
+                captured_ui_element_->on_mouse_release(MouseButton::Left);
                 captured_ui_element_->set_state(ui::ComponentState::Hovered);
             } else {
+                captured_ui_element_->on_mouse_exit();
                 captured_ui_element_->set_state(ui::ComponentState::Normal);
             }
 

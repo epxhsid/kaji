@@ -30,7 +30,7 @@ int main() {
 
         kaji::ui::LayoutStyle header_style;
         header_style.width = kaji::ui::Length::fill();
-        header_style.height = kaji::ui::Length::fixed(80);
+        header_style.height = kaji::ui::Length::fixed(240);
 
         kaji::ui::LayoutStyle lane_style;
         lane_style.width = kaji::ui::Length::fill();
