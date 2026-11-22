@@ -69,6 +69,11 @@ TransportBar::TransportBar(std::shared_ptr<kaji::TransportState> state, const Tr
         ))
     );
 
+    if (play_button_) play_button_->set_label("Play");
+    if (stop_button_) stop_button_->set_label("Stop");
+    if (record_button_) record_button_->set_label("Rec");
+    if (loop_button_) loop_button_->set_label("Loop");
+
     sync_button_states();
 }
 

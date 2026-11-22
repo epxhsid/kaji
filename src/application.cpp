@@ -23,6 +23,8 @@ Application::~Application() {
 
 void Application::shutdown() noexcept {
     ui_batcher_.reset();
+    ui_font_.reset();
+    text_shader_.reset();
     ui_shader_.reset();
     ui_root_.reset();
 
@@ -161,8 +163,17 @@ void Application::setup_viewport() {
 
     const std::string ui_vert = std::string(KAJI_SHADER_DIR) + "/ui.vert";
     const std::string ui_frag = std::string(KAJI_SHADER_DIR) + "/ui.frag";
+    const std::string text_vert = std::string(KAJI_SHADER_DIR) + "/text.vert";
+    const std::string text_frag = std::string(KAJI_SHADER_DIR) + "/text.frag";
+
     ui_shader_ = std::make_shared<gfx::Shader>(ui_vert, ui_frag);
-    ui_batcher_ = std::make_unique<ui::UIBatcher>(ui_shader_);
+    text_shader_ = std::make_shared<gfx::Shader>(text_vert, text_frag);
+    ui_font_ = std::make_shared<gfx::Font>("/usr/share/fonts/noto/NotoSans-Regular.ttf", 32);
+    ui_batcher_ = std::make_unique<ui::UIBatcher>(
+        ui_shader_,
+        text_shader_,
+        ui_font_
+    );
 
     if (ui_root_) {
         ui_root_->layout(gfx::Rect{0, 0, width_, height_});

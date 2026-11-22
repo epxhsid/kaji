@@ -1,6 +1,7 @@
 #pragma once
 #include "kaji/gfx/shader.h"
 #include "kaji/gfx/mesh.h"
+#include "kaji/gfx/font.h"
 #include "kaji/math/projection.h"
 #include "kaji/input.h"
 #include "kaji/ui/component.h"
@@ -51,6 +52,8 @@ private:
     std::vector<RenderItem> render_items_;
     std::unique_ptr<ui::UIElement> ui_root_;
     std::shared_ptr<gfx::Shader> ui_shader_;
+    std::shared_ptr<gfx::Shader> text_shader_;
+    std::shared_ptr<gfx::Font> ui_font_;
     std::unique_ptr<ui::UIBatcher> ui_batcher_;
     InputState input_;
     int width_ = 0;

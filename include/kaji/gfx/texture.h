@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <cstddef>
+#include <span>
 
 
 namespace kaji::gfx {
@@ -19,6 +21,7 @@ public:
     void bind(unsigned int slot = 0) const;
     void unbind(unsigned int slot = 0) const;
     void resize(int width, int height);
+    void upload(std::span<const std::byte> data);
 
     GLuint id() const noexcept { return id_; }
     int width() const noexcept { return width_; }

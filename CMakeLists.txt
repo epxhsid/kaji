@@ -8,6 +8,7 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
 
 add_executable(kaji
     src/application.cpp
@@ -17,6 +18,7 @@ add_executable(kaji
     src/gfx/blend_state.cpp
     src/gfx/buffer.cpp
     src/gfx/framebuffer.cpp
+    src/gfx/font.cpp
     src/gfx/mesh.cpp
     src/gfx/rect.cpp
     src/gfx/shader.cpp
@@ -73,4 +75,5 @@ target_link_libraries(kaji PRIVATE
     GLEW::GLEW
     glfw
     glm::glm
+    Freetype::Freetype
 )

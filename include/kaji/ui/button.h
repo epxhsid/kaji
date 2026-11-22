@@ -2,6 +2,7 @@
 
 #include "kaji/ui/component.h"
 #include <functional>
+#include <string>
 
 namespace kaji::ui {
 
@@ -17,11 +18,15 @@ public:
     void set_toggled(bool toggled) noexcept;
     bool toggled() const noexcept;
 
+    void set_label(std::string label);
+    const std::string& label() const noexcept;
+
     void paint(UIBatcher& batcher) const override;
 
 private:
     Callback callback_;
     bool toggled_ = false;
+    std::string label_;
 };
 
 }

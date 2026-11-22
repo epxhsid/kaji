@@ -9,11 +9,11 @@ Texture::Texture(int width, int height, GLenum internal_format, GLenum format)
         throw std::invalid_argument("texture dimensions must be positive");
     }
 
+    glGenTextures(1, &id_);
     if (id_ == 0) {
         throw std::runtime_error("failed to create texture");
     }
 
-    glGenTextures(1, &id_);
     glBindTexture(GL_TEXTURE_2D, id_);
 
     glTexImage2D(
@@ -75,6 +75,26 @@ void Texture::bind(unsigned int slot) const {
 
 void Texture::unbind(unsigned int slot) const {
     glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::upload(std::span<const std::byte> data) {
+    if (data.empty()) {
+        return;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, id_);
+    glTexSubImage2D(
+        GL_TEXTURE_2D,
+        0,
+        0,
+        0,
+        width_,
+        height_,
+        format_,
+        GL_UNSIGNED_BYTE,
+        data.data()
+    );
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
