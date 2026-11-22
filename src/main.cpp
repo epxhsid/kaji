@@ -52,7 +52,6 @@ int main() {
 
         const kaji::math::Mat4 scale = kaji::math::Mat4::make_scale(400.0f, 300.0f);
         const kaji::math::Mat4 offset = kaji::math::Mat4::make_translation(640.0f, 390.0f);
-
         const kaji::math::Mat4 model = offset * scale;
 
         app.add_render_item(shader, std::move(mesh), model);

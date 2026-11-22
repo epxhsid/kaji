@@ -13,7 +13,9 @@ struct Rect {
     int right() const noexcept;
     int bottom() const noexcept;
     bool empty() const noexcept;
+    bool contains(double point_x, double point_y) const noexcept;
 
+    Rect inset(int left, int top, int right, int bottom) const noexcept;
     Rect intersect(const Rect& other) const noexcept;
 };
 
@@ -47,6 +49,7 @@ public:
 
     ScopedClip(const ScopedClip&) = delete;
     ScopedClip& operator=(const ScopedClip&) = delete;
+
 private:
     ClipRect* clip_;
 };
