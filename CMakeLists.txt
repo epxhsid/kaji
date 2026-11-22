@@ -24,6 +24,23 @@ add_executable(kaji
     src/math/projection.cpp
 )
 
+option(KAJI_ENABLE_SANITIZERS "enable ASan and LSan" OFF)
+if (KAJI_ENABLE_SANITIZERS)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(kaji PRIVATE
+            -fsanitize=address
+            -fno-omit-frame-pointer
+            -g
+        )
+
+        target_link_options(kaji PRIVATE
+            -fsanitize=address
+        )
+    else()
+        message(WARNING "sanitizers are only supported on GCC and Clang")
+    endif()
+endif()
+
 target_include_directories(kaji PRIVATE
     "${PROJECT_SOURCE_DIR}/include"
 )
