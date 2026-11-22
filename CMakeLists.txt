@@ -24,6 +24,16 @@ add_executable(kaji
     src/math/projection.cpp
 )
 
+#[[
+    cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DKAJI_ENABLE_SANITIZERS=ON
+
+    cmake --build build -j$(nproc)
+
+    ASAN_OPTIONS=detect_leaks=1:halt_on_error=1:check_initialization_order=1 \
+    ./build/kaji
+]]
 option(KAJI_ENABLE_SANITIZERS "enable ASan and LSan" OFF)
 if (KAJI_ENABLE_SANITIZERS)
     if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
