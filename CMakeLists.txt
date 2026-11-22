@@ -13,6 +13,7 @@ add_executable(kaji
     src/application.cpp
     src/input.cpp
     src/main.cpp
+    src/component/transport_bar.cpp
     src/gfx/blend_state.cpp
     src/gfx/buffer.cpp
     src/gfx/framebuffer.cpp
@@ -25,7 +26,6 @@ add_executable(kaji
     src/ui/component.cpp
     src/ui/batcher.cpp
     src/ui/button.cpp
-    include/kaji/transport.h
 )
 
 #[[
